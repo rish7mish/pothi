@@ -2,6 +2,7 @@ import Link from "next/link";
 import { plainText, skandhaName, standardize } from "@/lib/text";
 import type { PageRow } from "@/lib/types";
 import PrintButton from "./PrintButton";
+import Nav from "./Nav";
 
 interface Chapter {
   skandha: number | null;
@@ -38,14 +39,15 @@ export function assemble(pages: PageRow[]): Chapter[] {
 export default function Book({
   pages,
   std,
-  base,
-  bookHref,
+  demo,
+  owner,
 }: {
   pages: PageRow[];
   std: boolean;
-  base: string;
-  bookHref: string;
+  demo: boolean;
+  owner: boolean;
 }) {
+  const bookHref = demo ? "/demo/book" : "/book";
   const chapters = assemble(pages);
   const pending = pages.filter((p) => p.blocks?.length && p.status !== "done").length;
   const fix = (s: string) => (std ? standardize(s) : s);
@@ -53,18 +55,18 @@ export default function Book({
 
   return (
     <>
+      <Nav active="book" demo={demo} owner={owner} />
       <div className="bookbar no-print">
         <div className="wrap">
-          <Link className="btn small" href={base}>
-            ← पन्ने
-          </Link>
           <span className="muted" style={{ fontSize: 16 }}>वर्तनी:</span>
-          <Link className={`btn small ${std ? "" : "primary"}`} href={bookHref}>
-            जैसी लिखी
-          </Link>
-          <Link className={`btn small ${std ? "primary" : ""}`} href={`${bookHref}?std=1`}>
-            मानक (में, हुए…)
-          </Link>
+          <span className="seg">
+            <Link className={std ? "" : "on"} href={bookHref}>
+              जैसी लिखी
+            </Link>
+            <Link className={std ? "on" : ""} href={`${bookHref}?std=1`}>
+              मानक (में, हुए…)
+            </Link>
+          </span>
           <PrintButton />
           {pending > 0 && <span className="chip warn">{pending} पन्ने अभी जाँचे नहीं गए</span>}
         </div>

@@ -163,3 +163,36 @@ input, textarea, select { font: inherit; color: inherit; }
   .book .sk { break-before: page; }
   .book .bnote { break-inside: avoid; }
 }
+
+/* ---------- Navigation ---------- */
+.nav { position: sticky; top: 0; z-index: 10; background: var(--card); border-bottom: 1px solid var(--line); }
+.navin { display: flex; align-items: center; gap: 12px; padding-top: 8px; padding-bottom: 8px; flex-wrap: wrap; }
+.brand { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--ink); text-decoration: none; margin-right: auto; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { padding: 8px 16px; border-radius: 999px; text-decoration: none; color: var(--ink); font-weight: 600; border: 2px solid transparent; }
+.tab.on { background: var(--accent); color: var(--accent-ink); }
+.tab:not(.on):hover { border-color: var(--line); }
+
+.nextcard { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; margin: 18px 0 4px; text-decoration: none; color: inherit; flex-wrap: wrap; border-width: 2px; border-color: #e7c89b; background: #fff8ec; }
+.nextcard > span:first-child { display: flex; flex-direction: column; gap: 4px; }
+.nextcard b { font-size: 22px; }
+.nextcard.done { border-color: #b9dcb3; background: var(--ok-bg); }
+
+.seg { display: inline-flex; border: 2px solid var(--line); border-radius: 12px; overflow: hidden; }
+.seg a { padding: 6px 14px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 16px; }
+.seg a.on { background: var(--accent); color: var(--accent-ink); }
+
+/* ---------- Review additions ---------- */
+.pager { display: flex; gap: 6px; }
+.rhead .title { display: flex; align-items: baseline; flex-wrap: wrap; }
+button.status-line { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 0; text-align: left; color: inherit; flex-wrap: wrap; }
+.blk .tools { gap: 18px; }
+button.link { background: none; border: 0; padding: 4px 0; color: var(--accent); font-weight: 600; font-size: 16px; }
+button.note-box { display: block; width: 100%; text-align: left; border-top: 0; border-right: 0; border-bottom: 0; color: inherit; }
+.note-box .nt { display: block; font-family: var(--serif); font-size: 20px; line-height: 1.7; }
+.sheethead { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.sheethead h4 { margin: 0; flex: 1; }
+.sheethead .x { width: 44px; height: 44px; border-radius: 50%; border: 0; background: #f1e9d8; font-size: 20px; }
+.ctx { font-family: var(--serif); font-size: 22px; line-height: 1.8; background: #fbf6ec; border-radius: 12px; padding: 10px 14px; margin: 6px 0 10px; }
+.ctx mark { background: var(--flag); border: 2px solid var(--flag-edge); border-radius: 8px; padding: 0 6px; }
+.ctx.quote { font-size: 18px; color: var(--muted); }
