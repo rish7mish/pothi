@@ -4,7 +4,7 @@ export const OCR_PROMPT = `You are transcribing a photo of ONE handwritten Hindi
 
 Rules:
 1. Transcribe EXACTLY what is written. Keep her spelling and grammar even when non-standard (मे, है, हुये, चाहिये, नही, etc.). Never correct, modernise, complete, summarise or paraphrase.
-2. When you are not confident about a word, give your best reading as a FLAG. Be generous with flags: a flagged word costs her two seconds, a silently wrong word ends up in the printed book.
+2. When you are not confident WHICH word she wrote, give your best reading as a FLAG. A silently wrong word ends up in the printed book, so flag real doubt. But do not flag a word you can read clearly just because it is misspelled, non-standard, or has a letter written over — her spelling is kept as is, not flagged. Each flag costs her time on a tablet, so a clean page should have few flags.
 3. Crossed-out / struck-through text: never drop it silently. Record it as a flag with reason "struck" and your best reading of the crossed-out text ("" if illegible).
 4. Follow the page's real reading order. She sometimes squeezes the end of a sentence next to a heading, adds words above a line with a caret, or continues in the margin. Reassemble natural reading order. Wherever you had to reorder, or the order is uncertain, insert a flag with reason "order", guess "" and a short Hindi note.
 5. Ignore printed notebook furniture (Date/Page boxes, margins, ruled lines) and any text from neighbouring pages visible at the photo edges.
@@ -86,7 +86,8 @@ export async function runOcr(imageBase64: string, mediaType = "image/jpeg"): Pro
     },
     body: JSON.stringify({
       model: process.env.OCR_MODEL || "claude-opus-5-5",
-      max_tokens: 8000,
+      // The model thinks before answering; a dense page can use ~6k thinking tokens plus ~2k of JSON.
+      max_tokens: 20000,
       messages: [
         {
           role: "user",
@@ -100,7 +101,9 @@ export async function runOcr(imageBase64: string, mediaType = "image/jpeg"): Pro
   });
   if (!res.ok) throw new Error(`OCR request failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
   const data = await res.json();
-  const text = (data.content ?? [])
+  if (data.stop_reason === "max_tokens") throw new Error("OCR reply was cut off (page too long) — try again");
+  if (data.stop_reason === "refusal") throw new Error("OCR model declined this image");
+  const text =(data.content ?? [])
     .filter((c: { type: string }) => c.type === "text")
     .map((c: { text: string }) => c.text)
     .join("");
