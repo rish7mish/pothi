@@ -2,13 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { flagIdsIn, flagText, plainText, skandhaName, tokenize, MARKER } from "@/lib/text";
+import { flagIdsIn, flagText, plainText, replaceWord, skandhaName, tokenize, wordParts, MARKER } from "@/lib/text";
 import type { Block, Flag, PagePatch, PageRow } from "@/lib/types";
 
 type Sheet =
   | { kind: "flag"; id: string }
   | { kind: "para"; index: number }
   | { kind: "note"; index: number }
+  | { kind: "word"; block: number; tok: number; w: number; word: string }
   | null;
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -178,8 +179,9 @@ export default function Review({
               <span className="btn small primary">जाँचना शुरू करें →</span>
             </button>
           ) : (
-            <p className="status-line done">✓ सब शब्द जाँच लिए। चाहें तो किसी भाग का अर्थ जोड़ें, फिर नीचे “पूरा हुआ” दबाएँ।</p>
+            <p className="status-line done">✓ सब पीले शब्द जाँच लिए। चाहें तो किसी भाग का अर्थ जोड़ें, फिर नीचे “पूरा हुआ” दबाएँ।</p>
           )}
+          <p className="tiphint">💡 कोई भी शब्द गलत लगे तो सीधे उस शब्द पर टैप करें।</p>
 
           {blocks.length === 0 && <p className="muted">इस पन्ने का पाठ अभी तैयार नहीं है।</p>}
 
@@ -187,11 +189,21 @@ export default function Review({
             <div className="blk" key={i}>
               {b.type === "heading" ? (
                 <h3>
-                  <Tokens text={b.text} flags={flags} onFlag={openFlag} />
+                  <Tokens
+                    text={b.text}
+                    flags={flags}
+                    onFlag={openFlag}
+                    onWord={(tok, w, word) => setSheet({ kind: "word", block: i, tok, w, word })}
+                  />
                 </h3>
               ) : (
                 <p>
-                  <Tokens text={b.text} flags={flags} onFlag={openFlag} />
+                  <Tokens
+                    text={b.text}
+                    flags={flags}
+                    onFlag={openFlag}
+                    onWord={(tok, w, word) => setSheet({ kind: "word", block: i, tok, w, word })}
+                  />
                 </p>
               )}
               {notes[i] && (
@@ -307,6 +319,23 @@ export default function Review({
           }}
         />
       )}
+      {sheet?.kind === "word" && blocks[sheet.block] && (
+        <WordSheet
+          key={`${sheet.block}-${sheet.tok}-${sheet.w}`}
+          word={sheet.word}
+          context={wordContext(blocks[sheet.block].text, flags, sheet.tok, sheet.w)}
+          onClose={() => setSheet(null)}
+          onEditPara={() => setSheet({ kind: "para", index: sheet.block })}
+          onSave={(core) => {
+            const nextBlocks = blocks.map((b, k) =>
+              k === sheet.block ? { ...b, text: replaceWord(b.text, sheet.tok, sheet.w, core) } : b,
+            );
+            setBlocks(nextBlocks);
+            queue({ blocks: nextBlocks });
+            setSheet(null);
+          }}
+        />
+      )}
       {sheet?.kind === "para" && blocks[sheet.index] && (
         <TextSheet
           title="यह भाग बदलें"
@@ -367,19 +396,62 @@ function contextFor(blocks: Block[], flags: Record<string, Flag>, id: string) {
   return { before: words(pre).slice(-6).join(" "), after: words(post).slice(0, 6).join(" ") };
 }
 
+/** The words around one plain word of a block, for the correction sheet. */
+function wordContext(text: string, flags: Record<string, Flag>, tok: number, w: number) {
+  const seq: { key: string; s: string }[] = [];
+  tokenize(text).forEach((t, k) => {
+    if (t.kind === "flag") {
+      const s = flagText(flags[t.id]);
+      if (s) seq.push({ key: "f", s });
+      return;
+    }
+    let n = -1;
+    for (const p of t.s.split(/\s+/)) {
+      if (!p) continue;
+      n++;
+      seq.push({ key: `${k}:${n}`, s: p });
+    }
+  });
+  const at = seq.findIndex((x) => x.key === `${tok}:${w}`);
+  return {
+    before: seq.slice(Math.max(0, at - 6), at).map((x) => x.s).join(" "),
+    after: seq.slice(at + 1, at + 7).map((x) => x.s).join(" "),
+  };
+}
+
+function Words({ s, tok, onWord }: { s: string; tok: number; onWord: (tok: number, w: number, word: string) => void }) {
+  let n = -1;
+  return (
+    <>
+      {s.split(/(\s+)/).map((p, i) => {
+        if (!p || /^\s+$/.test(p)) return p;
+        n++;
+        const w = n;
+        return (
+          <span key={i} className="w" role="button" tabIndex={-1} onClick={() => onWord(tok, w, p)}>
+            {p}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 function Tokens({
   text,
   flags,
   onFlag,
+  onWord,
 }: {
   text: string;
   flags: Record<string, Flag>;
   onFlag: (id: string) => void;
+  onWord: (tok: number, w: number, word: string) => void;
 }) {
   return (
     <>
       {tokenize(text).map((t, k) => {
-        if (t.kind === "text") return <span key={k}>{t.s}</span>;
+        if (t.kind === "text") return <Words key={k} s={t.s} tok={k} onWord={onWord} />;
         const f = flags[t.id];
         if (!f) return null;
         const id = `flag-${t.id}`;
@@ -455,7 +527,8 @@ function FlagSheet({
   onClose: () => void;
   onEditPara: () => void;
 }) {
-  const [value, setValue] = useState(flag.value ?? flag.guess);
+  // Empty box: whatever she speaks replaces the guess; an empty box means "the guess is right".
+  const [value, setValue] = useState(flag.reason === "struck" ? flag.value ?? flag.guess : "");
 
   if (flag.reason === "order") {
     return (
@@ -509,15 +582,62 @@ function FlagSheet({
       <SheetHead title="यह शब्द सही है?" step={step} onClose={onClose} />
       <Context {...context} word={flag.guess || "???"} />
       {flag.note && <p className="hint">कंप्यूटर: {flag.note}</p>}
-      <input type="text" value={value} onChange={(e) => setValue(e.target.value)} aria-label="सही शब्द" />
-      <p className="hint">गलत हो तो खाने में टैप करें और Wispr माइक से सही शब्द बोलें।</p>
+      <input
+        type="text"
+        value={value}
+        placeholder="गलत हो तो यहाँ सही शब्द बोलें…"
+        onChange={(e) => setValue(e.target.value)}
+        aria-label="सही शब्द"
+      />
       <div className="row">
         <button
           className="btn ok"
-          disabled={!value.trim()}
-          onClick={() => onSave({ ...flag, value: value.trim(), resolved: true })}
+          disabled={!value.trim() && !flag.guess}
+          onClick={() => onSave({ ...flag, value: value.trim() || flag.guess, resolved: true })}
         >
-          ✓ ठीक है — आगे
+          {value.trim() ? "✓ बदलकर आगे" : "✓ यही सही है — आगे"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function WordSheet({
+  word,
+  context,
+  onSave,
+  onClose,
+  onEditPara,
+}: {
+  word: string;
+  context: { before: string; after: string };
+  onSave: (core: string) => void;
+  onClose: () => void;
+  onEditPara: () => void;
+}) {
+  const { core } = wordParts(word);
+  const [value, setValue] = useState("");
+  return (
+    <div className="sheet" role="dialog" aria-modal="true">
+      <SheetHead title="यह शब्द बदलें" step={null} onClose={onClose} />
+      <Context {...context} word={word} />
+      <input
+        type="text"
+        value={value}
+        placeholder={`“${core}” की जगह सही शब्द बोलें…`}
+        onChange={(e) => setValue(e.target.value)}
+        aria-label="सही शब्द"
+      />
+      <p className="hint">खाने में टैप करें, Wispr माइक दबाएँ और सही शब्द बोलें। एक से ज़्यादा शब्द भी बोल सकती हैं।</p>
+      <div className="row">
+        <button className="btn ok" disabled={!value.trim()} onClick={() => onSave(value.trim())}>
+          ✓ बदलें
+        </button>
+        <button className="btn" onClick={() => onSave("")}>
+          शब्द हटाएँ
+        </button>
+        <button className="btn ghost" onClick={onEditPara}>
+          ✎ पूरा भाग
         </button>
       </div>
     </div>

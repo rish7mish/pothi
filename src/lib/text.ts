@@ -78,3 +78,35 @@ export function skandhaName(n: number | null): string {
   if (n && n >= 1 && n <= 12) return `${ORDINAL[n]} स्कन्ध`;
   return "स्कन्ध अज्ञात";
 }
+
+// ---- Tap-any-word correction ----
+
+const PUNCT = /^([("'“‘]*)(.*?)([।॥,;:!?.)"'”’—–-]*)$/u;
+
+/** Split a word into leading punctuation, the word itself, and trailing punctuation (e.g. the danda in "दिया।"). */
+export function wordParts(w: string): { lead: string; core: string; trail: string } {
+  const m = w.match(PUNCT);
+  return m ? { lead: m[1], core: m[2], trail: m[3] } : { lead: "", core: w, trail: "" };
+}
+
+/** Replace word number `w` inside text-token number `tok` of a block's text. Empty `core` deletes the word. */
+export function replaceWord(text: string, tok: number, w: number, core: string): string {
+  return tokenize(text)
+    .map((t, k) => {
+      if (t.kind === "flag") return `⟦${t.id}⟧`;
+      if (k !== tok) return t.s;
+      const parts = t.s.split(/(\s+)/);
+      let n = -1;
+      return parts
+        .map((p) => {
+          if (!p || /^\s+$/.test(p)) return p;
+          n++;
+          if (n !== w) return p;
+          const { lead, trail } = wordParts(p);
+          return core ? lead + core + trail : trail;
+        })
+        .join("");
+    })
+    .join("")
+    .replace(/[ \t]{2,}/g, " ");
+}
