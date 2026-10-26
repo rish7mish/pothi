@@ -60,6 +60,19 @@ export default function PageList({
           </div>
         ) : null}
 
+        {(owner || demo) && (
+          <div className="quickadd">
+            {!demo && (
+              <Link className="btn" href="/admin">
+                📷 फोटो से पन्ना जोड़ें
+              </Link>
+            )}
+            <Link className="btn" href={demo ? "/demo/add" : "/admin?mode=speak"}>
+              🎙 बोलकर पन्ना जोड़ें
+            </Link>
+          </div>
+        )}
+
         <div className="muted" style={{ marginTop: 16 }}>
           {pages.length} में से {done} पन्ने पूरे
         </div>
@@ -88,8 +101,12 @@ export default function PageList({
               <div className="grid">
                 {list.map((p) => (
                   <Link className="card pcard" key={p.id} href={`${base}/${p.id}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={thumbs[p.id]} alt="" loading="lazy" />
+                    {thumbs[p.id] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={thumbs[p.id]} alt="" loading="lazy" />
+                    ) : (
+                      <span className="nothumb">🎙<small>बोलकर लिखा</small></span>
+                    )}
                     <span className="meta">
                       <b>पन्ना {p.seq}</b>
                       {p.adhyay ? <span className="muted" style={{ fontSize: 15 }}>अध्याय {p.adhyay}</span> : null}

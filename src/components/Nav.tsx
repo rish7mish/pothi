@@ -9,7 +9,8 @@ export default function Nav({ active, demo, owner }: { active: NavKey; demo: boo
     { key: "pages", href: base, label: "📄 पन्ने" },
     { key: "book", href: demo ? "/demo/book" : "/book", label: "📖 किताब" },
   ];
-  if (owner && !demo) items.push({ key: "upload", href: "/admin", label: "＋ पन्ने जोड़ें" });
+  if (demo) items.push({ key: "upload", href: "/demo/add", label: "＋ जोड़ें" });
+  else if (owner) items.push({ key: "upload", href: "/admin", label: "＋ जोड़ें" });
 
   return (
     <nav className="nav no-print">

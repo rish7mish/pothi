@@ -123,7 +123,7 @@ export default function Review({
 
   // ---- render ----
   return (
-    <div className="review">
+    <div className={`review ${imageUrl ? "" : "nophoto"}`}>
       <header className="rhead">
         <button className="btn small" onClick={() => go(base)}>
           ← सभी पन्ने
@@ -154,6 +154,7 @@ export default function Review({
       </header>
 
       <div className="rbody">
+        {imageUrl && (
         <div className="photo">
           <div className="zoom">
             <button aria-label="छोटा करें" onClick={() => setZoom((z) => Math.max(0, z - 1))}>
@@ -166,6 +167,7 @@ export default function Review({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imageUrl} alt="हाथ से लिखा पन्ना" style={{ width: `${ZOOMS[zoom]}%` }} />
         </div>
+        )}
 
         <div className="text">
           {open > 0 ? (

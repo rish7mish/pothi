@@ -196,3 +196,33 @@ button.note-box { display: block; width: 100%; text-align: left; border-top: 0; 
 .ctx { font-family: var(--serif); font-size: 22px; line-height: 1.8; background: #fbf6ec; border-radius: 12px; padding: 10px 14px; margin: 6px 0 10px; }
 .ctx mark { background: var(--flag); border: 2px solid var(--flag-edge); border-radius: 8px; padding: 0 6px; }
 .ctx.quote { font-size: 18px; color: var(--muted); }
+
+/* ---------- Add page ---------- */
+.h1 { font-size: 28px; margin: 18px 0 12px; }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.mode { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--card); color: inherit; text-align: left; }
+.mode .ic { font-size: 32px; }
+.mode b { font-size: 22px; }
+.mode .muted { font-size: 16px; }
+.mode.on { border-color: var(--accent); background: #fff4ea; box-shadow: 0 0 0 3px rgba(180,68,26,.12); }
+.addcard { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.inline { flex-direction: row; gap: 16px; flex-wrap: wrap; }
+.field.inline label { display: flex; flex-direction: column; gap: 6px; }
+.flabel { font-weight: 700; font-size: 17px; }
+.choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice { min-height: 48px; padding: 6px 18px; border-radius: 12px; border: 2px solid var(--line); background: #fff; font-weight: 600; color: var(--ink); }
+.choice.on { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.tin { min-height: 48px; border: 2px solid var(--line); border-radius: 12px; padding: 8px 12px; background: #fff; }
+.tin.serif { font-family: var(--serif); font-size: 22px; }
+textarea.dict { min-height: 260px; line-height: 1.8; resize: vertical; }
+.row2 { display: flex; gap: 12px; flex-wrap: wrap; }
+.row2 .btn { flex: 1; min-width: 220px; }
+.btn.big { min-height: 64px; font-size: 21px; }
+.addcard .hint { font-size: 16px; color: var(--muted); margin: 0; }
+.uplist { border-top: 1px solid var(--line); }
+.nophoto .rbody { grid-template-rows: none; grid-template-columns: none; }
+.photo-none { display: none; }
+.nothumb { display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 3 / 4; background: #f1e7d3; font-size: 40px; }
+.nothumb small { font-size: 15px; color: var(--muted); }
+.quickadd { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }

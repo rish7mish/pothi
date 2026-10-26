@@ -49,7 +49,8 @@ export async function getPage(id: string): Promise<PageRow | null> {
 
 /** Demo photos ship with the app under /public; real ones live in the private bucket. */
 export async function imageUrl(page: Pick<PageRow, "is_demo" | "image_path">): Promise<string> {
-  if (page.is_demo) return page.image_path;
+  // Dictated pages have no photo.
+  if (!page.image_path || page.is_demo) return page.image_path;
   const { data, error } = await db().storage.from(BUCKET).createSignedUrl(page.image_path, 60 * 60 * 6);
   if (error) throw new Error(error.message);
   return data.signedUrl;
@@ -57,7 +58,7 @@ export async function imageUrl(page: Pick<PageRow, "is_demo" | "image_path">): P
 
 export async function imageUrls(pages: PageRow[]): Promise<Record<string, string>> {
   const out: Record<string, string> = {};
-  const real = pages.filter((p) => !p.is_demo);
+  const real = pages.filter((p) => !p.is_demo && p.image_path);
   for (const p of pages) if (p.is_demo) out[p.id] = p.image_path;
   if (real.length) {
     const { data, error } = await db()
