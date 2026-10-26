@@ -287,7 +287,7 @@ function SpeakAdd({ notebooks, base, demo }: { notebooks: string[]; base: string
           onChange={(e) => setText(e.target.value)}
         />
       </label>
-      <p className="hint">नया भाग शुरू करना हो तो नई पंक्ति पर बोलें। बाद में हर भाग का अर्थ भी जोड़ सकती हैं।</p>
+      <p className="hint">नया भाग शुरू करना हो तो नई पंक्ति पर बोलें। सेव करने के बाद किसी भी शब्द पर टैप करके उसे बदल सकती हैं, और हर भाग का अर्थ भी जोड़ सकती हैं।</p>
       {err && <p className="chip bad">{err}</p>}
       <button className="btn ok big" disabled={busy || !text.trim()} onClick={save}>
         {busy ? "सेव हो रहा है…" : "✓ पन्ना सेव करें"}
