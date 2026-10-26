@@ -1,95 +1,56 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
+import { isOwner } from "@/lib/server";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const owner = await isOwner();
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main className="wrap">
+      <section className="hero">
+        <h1>पोथी</h1>
+        <p style={{ fontSize: 22, margin: "6px 0 4px" }}>हाथ से लिखी कॉपी से छपी हुई किताब तक</p>
+        <p className="en">
+          My mother wrote her retelling of the Shrimad Bhagavat by hand, in notebooks from 2008 and 2022. A typist&apos;s
+          copy lost the meaning. Pothi reads each page with OCR, highlights only the words it is unsure of, and lets her
+          correct them and add explanations <b>by voice</b> on her tablet. The result is a print-ready book.
+        </p>
+      </section>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <Link className="btn primary" href="/demo">
+          Try the demo →
+        </Link>
+        {owner && (
+          <>
+            <Link className="btn" href="/p">
+              मेरे पन्ने
+            </Link>
+            <Link className="btn" href="/admin">
+              Upload pages
+            </Link>
+          </>
+        )}
+      </div>
+
+      <div className="steps">
+        <div className="card">
+          <b>1 · फोटो</b>
+          <span className="muted">Each notebook page is photographed and uploaded.</span>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <div className="card">
+          <b>2 · OCR</b>
+          <span className="muted">Claude transcribes her handwriting exactly as written and flags every word it doubts.</span>
+        </div>
+        <div className="card">
+          <b>3 · आवाज़ से जाँच</b>
+          <span className="muted">She taps a yellow word and speaks the right one with Wispr Flow. No typing.</span>
+        </div>
+        <div className="card">
+          <b>4 · किताब</b>
+          <span className="muted">Chapters are assembled in Bhagavat order and printed as an A5 book.</span>
+        </div>
+      </div>
+    </main>
   );
 }
