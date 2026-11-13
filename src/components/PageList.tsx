@@ -63,8 +63,8 @@ export default function PageList({
         {(owner || demo) && (
           <div className="quickadd">
             {!demo && (
-              <Link className="btn" href="/admin">
-                📷 फोटो से पन्ना जोड़ें
+              <Link className="btn primary" href="/photo">
+                📷 फोटो खींचें
               </Link>
             )}
             <Link className="btn" href={demo ? "/demo/add" : "/admin?mode=speak"}>

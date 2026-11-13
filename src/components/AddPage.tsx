@@ -3,23 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { shrink } from "@/lib/shrink";
 import { skandhaName } from "@/lib/text";
 
 type Row = { name: string; state: string; id?: string };
 type Mode = "photo" | "speak";
-
-/** Shrink a phone photo to ~2000px JPEG, honouring EXIF rotation. */
-async function shrink(file: File): Promise<Blob> {
-  const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const scale = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bmp.width * scale);
-  canvas.height = Math.round(bmp.height * scale);
-  canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
-  return await new Promise<Blob>((res, rej) =>
-    canvas.toBlob((b) => (b ? res(b) : rej(new Error("resize failed"))), "image/jpeg", 0.85),
-  );
-}
 
 async function ocr(id: string): Promise<{ ok: boolean; msg: string }> {
   const r = await fetch(`/api/ocr/${id}`, { method: "POST" });
@@ -112,6 +100,7 @@ export default function AddPage({
       {!demo && pendingOcr.length > 0 && (
         <section className="card" style={{ padding: 16, marginTop: 20 }}>
           <h3 style={{ margin: "0 0 8px" }}>पढ़ना बाकी</h3>
+          {pendingOcr.length > 1 && <ReadAll ids={pendingOcr.map((p) => p.id)} />}
           {pendingOcr.map((p) => (
             <RetryRow key={p.id} {...p} />
           ))}
@@ -314,5 +303,29 @@ function RetryRow({ id, label, error }: { id: string; label: string; error: stri
         फिर से पढ़ें
       </button>
     </div>
+  );
+}
+
+/** Reads every waiting page, two at a time. */
+function ReadAll({ ids }: { ids: string[] }) {
+  const router = useRouter();
+  const [left, setLeft] = useState<number | null>(null);
+  async function run() {
+    const queue = [...ids];
+    setLeft(queue.length);
+    const worker = async () => {
+      for (let id = queue.shift(); id; id = queue.shift()) {
+        await ocr(id);
+        setLeft((n) => (n ?? 1) - 1);
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    setLeft(null);
+    router.refresh();
+  }
+  return (
+    <button className="btn primary" style={{ marginBottom: 8 }} disabled={left !== null} onClick={run}>
+      {left !== null ? `पढ़ रहे हैं… ${left} बाकी` : `सब पढ़ें (${ids.length})`}
+    </button>
   );
 }

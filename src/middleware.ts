@@ -7,4 +7,4 @@ export function middleware(req: NextRequest) {
   return NextResponse.redirect(new URL("/", req.url));
 }
 
-export const config = { matcher: ["/p", "/p/:path*", "/book", "/admin"] };
+export const config = { matcher: ["/p", "/p/:path*", "/book", "/admin", "/photo"] };
