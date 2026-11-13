@@ -26,7 +26,7 @@ export default function Snap({ notebook, saved }: { notebook: string; saved: num
   const camera = useRef<HTMLInputElement>(null);
   const [count, setCount] = useState(saved);
   const [sending, setSending] = useState(0);
-  const [last, setLast] = useState<{ url: string; seq: number } | null>(null);
+  const [last, setLast] = useState<{ url: string } | null>(null);
   const [failed, setFailed] = useState<Blob[]>([]);
 
   async function send(photo: Blob) {
@@ -41,7 +41,7 @@ export default function Snap({ notebook, saved }: { notebook: string; saved: num
       setCount((n) => n + 1);
       setLast((old) => {
         if (old) URL.revokeObjectURL(old.url);
-        return { url: URL.createObjectURL(photo), seq: j.seq };
+        return { url: URL.createObjectURL(photo) };
       });
       readLater(j.id);
     } catch {
@@ -99,7 +99,7 @@ export default function Snap({ notebook, saved }: { notebook: string; saved: num
           </p>
         )}
         {last && sending === 0 && failed.length === 0 && (
-          <p className="snapok">✓ पन्ना {last.seq} सेव हो गया</p>
+          <p className="snapok">✓ फोटो सेव हो गई</p>
         )}
         {last && (
           // eslint-disable-next-line @next/next/no-img-element

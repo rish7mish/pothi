@@ -28,6 +28,8 @@ export interface PageRow {
   status: PageStatus;
   skandha: number | null;
   adhyay: number | null;
+  /** The page number she wrote on the page (usually top right), read by OCR or set by hand. */
+  page_no: number | null;
   heading: string | null;
   date_written: string | null;
   blocks: Block[];
@@ -39,5 +41,5 @@ export interface PageRow {
 }
 
 export type PagePatch = Partial<
-  Pick<PageRow, "blocks" | "flags" | "notes" | "status" | "skandha" | "adhyay" | "heading">
+  Pick<PageRow, "blocks" | "flags" | "notes" | "status" | "skandha" | "adhyay" | "heading" | "page_no">
 >;

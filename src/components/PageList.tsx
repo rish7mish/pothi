@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { openFlagCount } from "@/lib/text";
+import { openFlagCount, pageNo } from "@/lib/text";
 import type { PageRow } from "@/lib/types";
 import Nav from "./Nav";
 
@@ -45,7 +45,7 @@ export default function PageList({
             <span>
               <span className="muted" style={{ fontSize: 16 }}>अगला पन्ना</span>
               <b>
-                {notebookLabel(next.notebook)} · पन्ना {next.seq}
+                {notebookLabel(next.notebook)} · पन्ना {pageNo(next)}
               </b>
               <StatusChip p={next} />
             </span>
@@ -108,7 +108,7 @@ export default function PageList({
                       <span className="nothumb">🎙<small>बोलकर लिखा</small></span>
                     )}
                     <span className="meta">
-                      <b>पन्ना {p.seq}</b>
+                      <b>पन्ना {pageNo(p)}</b>
                       {p.adhyay ? <span className="muted" style={{ fontSize: 15 }}>अध्याय {p.adhyay}</span> : null}
                       <StatusChip p={p} />
                     </span>

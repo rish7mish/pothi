@@ -8,6 +8,7 @@ create table if not exists public.pages (
   status text not null default 'new',
   skandha int,
   adhyay int,
+  page_no int,
   heading text,
   date_written text,
   blocks jsonb not null default '[]'::jsonb,
@@ -28,3 +29,6 @@ create index if not exists pages_order on public.pages (is_demo, notebook, seq);
 insert into storage.buckets (id, name, public)
 values ('pages', 'pages', false)
 on conflict (id) do nothing;
+
+-- Added Nov 2026: the page number she writes on each page.
+alter table public.pages add column if not exists page_no int;

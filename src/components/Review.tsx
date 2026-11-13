@@ -41,6 +41,7 @@ export default function Review({
   const [notes, setNotes] = useState<Record<string, string>>(page.notes ?? {});
   const [skandha, setSkandha] = useState<number | null>(page.skandha);
   const [adhyay, setAdhyay] = useState<number | null>(page.adhyay);
+  const [pageNum, setPageNum] = useState<number | null>(page.page_no);
   const [sheet, setSheet] = useState<Sheet>(null);
   const [save, setSave] = useState<SaveState>("idle");
   const [zoom, setZoom] = useState(0);
@@ -231,6 +232,7 @@ export default function Review({
             <summary>
               अध्याय जानकारी: {skandhaName(skandha)}
               {adhyay ? ` · अध्याय ${adhyay}` : ""}
+              {pageNum ? ` · पन्ना ${pageNum}` : ""}
             </summary>
             <div className="f">
               <label>
@@ -265,6 +267,22 @@ export default function Review({
                     const v = e.target.value === "" ? null : Math.max(1, Math.floor(Number(e.target.value)));
                     setAdhyay(v);
                     queue({ adhyay: v });
+                  }}
+                />
+              </label>
+              <label>
+                पन्ना नंबर{" "}
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={9999}
+                  value={pageNum ?? ""}
+                  style={{ width: 100 }}
+                  onChange={(e) => {
+                    const v = e.target.value === "" ? null : Math.max(1, Math.floor(Number(e.target.value)));
+                    setPageNum(v);
+                    queue({ page_no: v });
                   }}
                 />
               </label>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Review from "@/components/Review";
 import PageList, { notebookLabel } from "@/components/PageList";
 import Book from "@/components/Book";
+import { pageNo } from "./text";
 import { getPage, imageUrl, imageUrls, isOwner, listPages } from "./server";
 
 /** Shared by the private routes (/p, /book) and the open demo (/demo, /demo/book). */
@@ -22,7 +23,7 @@ export async function ReviewView({ id, demo }: { id: string; demo: boolean }) {
   const idx = pages.findIndex((p) => p.id === id);
   const nextTodo = pages.slice(idx + 1).find((p) => p.status !== "done") ?? null;
   const url = await imageUrl(page);
-  const label = `${notebookLabel(page.notebook)} · पन्ना ${page.seq}`;
+  const label = `${notebookLabel(page.notebook)} · पन्ना ${pageNo(page)}`;
   return (
     <Review
       key={page.id + page.updated_at}

@@ -25,6 +25,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         notes: {},
         date_written: r.date_written,
         adhyay: r.adhyay,
+        page_no: r.page_no,
         skandha: r.skandha,
         heading: r.heading,
         ocr_error: null,

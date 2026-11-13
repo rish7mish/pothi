@@ -9,12 +9,13 @@ Rules:
 4. Follow the page's real reading order. She sometimes squeezes the end of a sentence next to a heading, adds words above a line with a caret, or continues in the margin. Reassemble natural reading order. Wherever you had to reorder, or the order is uncertain, insert a flag with reason "order", guess "" and a short Hindi note.
 5. Ignore printed notebook furniture (Date/Page boxes, margins, ruled lines) and any text from neighbouring pages visible at the photo edges.
 6. Blocks: an "अध्याय" line, a chapter title (often in quotes or underlined) and an "ॐ ..." invocation are type "heading". Everything else is "para". Start a new para only where she starts a new paragraph; join lines that merely wrap.
-7. Metadata, only if written on this page: date_written exactly as written (e.g. "21.8" or "6.11.2022"); adhyay as a number ("अध्याय 19" → 19, "पहला अध्याय" → 1, "दूसरा अध्याय" → 2); heading = the chapter title text; skandha only if a skandha number is written. If the text is the Bhagavat Mahatmya (माहात्म्य), set mahatmya true. A page that continues a chapter without a heading has null metadata.
+7. Page number: she usually writes the page number in the top right corner, sometimes top left or bottom. Put it in page_no as a number (Devanagari digits like १२ → 12). It is a small standalone number, not part of the text and not a date. Do NOT include it in any block. If there is none, page_no is null.
+8. Metadata, only if written on this page: date_written exactly as written (e.g. "21.8" or "6.11.2022"); adhyay as a number ("अध्याय 19" → 19, "पहला अध्याय" → 1, "दूसरा अध्याय" → 2); heading = the chapter title text; skandha only if a skandha number is written. If the text is the Bhagavat Mahatmya (माहात्म्य), set mahatmya true. A page that continues a chapter without a heading has null metadata.
 
 Flag syntax: inside a block's text, write ⟦N⟧ exactly where the flagged word belongs (N = 1, 2, 3 …). The marker REPLACES the word: do not also write the word in the text. List every flag in "flags".
 
 Reply with ONLY this JSON, no prose, no code fence:
-{"date_written": string|null, "adhyay": number|null, "skandha": number|null, "mahatmya": boolean, "heading": string|null,
+{"page_no": number|null, "date_written": string|null, "adhyay": number|null, "skandha": number|null, "mahatmya": boolean, "heading": string|null,
  "blocks": [{"type": "heading"|"para", "text": string}],
  "flags": [{"n": number, "guess": string, "reason": "unclear"|"struck"|"order", "note": string}]}
 "note" is one short Hindi phrase such as "शायद करोड़ों" or "स्याही धुंधली".`;
@@ -23,6 +24,7 @@ export interface OcrResult {
   date_written: string | null;
   adhyay: number | null;
   skandha: number | null;
+  page_no: number | null;
   heading: string | null;
   blocks: Block[];
   flags: Record<string, Flag>;
@@ -67,6 +69,7 @@ export function parseOcr(raw: string): OcrResult {
   return {
     date_written: j.date_written ? String(j.date_written) : null,
     adhyay: num(j.adhyay),
+    page_no: num(j.page_no),
     skandha: j.mahatmya === true ? 0 : num(j.skandha),
     heading: j.heading ? String(j.heading) : null,
     blocks,

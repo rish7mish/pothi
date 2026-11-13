@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { plainText, skandhaName, standardize } from "@/lib/text";
+import { byPage, pageNo, plainText, skandhaName, standardize } from "@/lib/text";
 import type { PageRow } from "@/lib/types";
 import PrintButton from "./PrintButton";
 import Nav from "./Nav";
@@ -15,7 +15,7 @@ interface Chapter {
  * Chapters are then ordered by skandha and adhyay, whichever notebook they came from.
  */
 export function assemble(pages: PageRow[]): Chapter[] {
-  const sorted = [...pages].sort((a, b) => a.notebook.localeCompare(b.notebook) || a.seq - b.seq);
+  const sorted = [...pages].sort(byPage);
   const chapters: Chapter[] = [];
   let curBook = "";
   for (const p of sorted) {
@@ -107,7 +107,7 @@ export default function Book({
                     );
                   })}
                   <div className="src no-print">
-                    {p.notebook} · पन्ना {p.seq}
+                    {p.notebook} · पन्ना {pageNo(p)}
                     {p.date_written ? ` · ${p.date_written}` : ""}
                   </div>
                 </div>

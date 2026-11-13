@@ -110,3 +110,13 @@ export function replaceWord(text: string, tok: number, w: number, core: string):
     .join("")
     .replace(/[ \t]{2,}/g, " ");
 }
+
+/** The number to show for a page: the one she wrote on it, else its upload order. */
+export function pageNo(p: { page_no?: number | null; seq: number }): number {
+  return p.page_no ?? p.seq;
+}
+
+/** Notebook, then her page number, then upload order. */
+export function byPage<T extends { notebook: string; page_no?: number | null; seq: number }>(a: T, b: T): number {
+  return a.notebook.localeCompare(b.notebook) || pageNo(a) - pageNo(b) || a.seq - b.seq;
+}

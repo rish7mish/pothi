@@ -2,6 +2,7 @@ import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { PageRow } from "./types";
+import { byPage } from "./text";
 
 export const BUCKET = "pages";
 export const KEY_COOKIE = "pothi_key";
@@ -27,7 +28,7 @@ export async function isOwner(): Promise<boolean> {
 }
 
 const COLS =
-  "id,is_demo,notebook,seq,image_path,status,skandha,adhyay,heading,date_written,blocks,flags,notes,ocr_error,updated_at";
+  "id,is_demo,notebook,seq,image_path,status,skandha,adhyay,page_no,heading,date_written,blocks,flags,notes,ocr_error,updated_at";
 
 export async function listPages(demo: boolean): Promise<PageRow[]> {
   const { data, error } = await db()
@@ -37,7 +38,7 @@ export async function listPages(demo: boolean): Promise<PageRow[]> {
     .order("notebook")
     .order("seq");
   if (error) throw new Error(error.message);
-  return (data ?? []) as PageRow[];
+  return ((data ?? []) as PageRow[]).sort(byPage);
 }
 
 export async function getPage(id: string): Promise<PageRow | null> {
